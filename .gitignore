@@ -1,0 +1,4 @@
+
+# ignore evn directory
+evn/*
+env
