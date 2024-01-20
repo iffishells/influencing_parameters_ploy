@@ -2,3 +2,7 @@
 # ignore evn directory
 evn/*
 env
+
+# ignore specifc directory
+plots
+plots/*
