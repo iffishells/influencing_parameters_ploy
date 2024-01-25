@@ -3,20 +3,20 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
 
-def plot_correlation_matrics(df_training, parent_plot_directory):
+def plot_correlation_matrics(df = None,saving_path= None,title=None):
     print('Plot Correlation Matrix')
     # Calculate the correlation matrix
-    print(list(df_training))
-    correlation_matrix = df_training.drop(columns='Date Time').corr()
+    print(list(df))
+    correlation_matrix = df.drop(columns='Date Time').corr()
 
     # Plot the correlation matrix as a heatmap
     plt.figure(figsize=(8, 6))
     sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f", linewidths=.5)
-    plt.title('Correlation Matrix')
+    plt.title(f'Correlation Matrix of  : {title}')
     plt.tight_layout()
-    plt.savefig(f'{parent_plot_directory}correlation_plot.png')
-    plt.show()
-    plt.close()
+    plt.savefig(f'{saving_path}correlation_plot_{title}.png')
+    # plt.show()
+    # plt.close()
 
 
 def plot_all_data(

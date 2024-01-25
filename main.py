@@ -11,7 +11,10 @@ import configparser
 import warnings
 from sklearn.ensemble import RandomForestRegressor
 import ast
-
+# import tensorflow as tf
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.layers import Dense
+from sklearn.preprocessing import MinMaxScaler
 
 warnings.filterwarnings("ignore")
 parent_plot_directory = os.path.join('Plots/matplotlib/')
@@ -36,12 +39,13 @@ testing_file_path = config.get('files_path', 'testing_file_path')
 
 polynomial_model = config.get('machine_learing_models', 'polynomial_model')
 random_forest_model = config.get('machine_learing_models', 'random_forest_model')
+neural_network_model = config.get('machine_learing_models', 'neural_network_model')
 
 data_independent_features = ast.literal_eval(config.get('data_features', 'data_independent_features'))
 data_dependent_features = ast.literal_eval(config.get('data_features', 'data_dependent_features'))
 
-print('dependent Data Features : ',data_dependent_features)
-print('Independent Data Features : ',data_independent_features)
+print('dependent Data Features : ', data_dependent_features)
+print('Independent Data Features : ', data_independent_features)
 
 print(f'Parent directory for Plots : {parent_plot_directory}')
 print(f'FilePath for training Data : {training_file_path}')
@@ -74,7 +78,13 @@ print(f"shape of Testing Data(X) : {X_test.shape}")
 print(f"shape of Testing Data(Y) : {y_test.shape}")
 
 if correlation_matrix_plot == 'True':
-    plot_correlation_matrics(df_training, parent_plot_directory)
+    plot_correlation_matrics(df=df_training,
+                             saving_path=parent_plot_directory,
+                             title='training_data')
+    plot_correlation_matrics(df= df_testing,
+                             saving_path=parent_plot_directory,
+                             title='testing_data')
+
 if data_plot == 'True':
     plot_all_data(df=df_training,
                   saving_path=parent_plot_plotly_directory,
@@ -90,6 +100,33 @@ if data_plot == 'True':
                   )
 
 
+
+# if polynomial_model == 'True':
+#     print('[INFO] Training Polynomial Regression Model')
+#
+#     # Modeling
+#     # Train polynomial regression model on the whole dataset
+#     pr = PolynomialFeatures(degree=4)
+#     X_poly_train = pr.fit_transform(X_train)
+#     X_poly_test = pr.fit_transform(X_test)
+#
+#     model = LinearRegression()
+#
+#     print('[INFO] Model Parameters')
+#     print('Parameter : ', model.get_params())
+#     print(f'[INFO] Model Coefficients : {model.coef_}')
+#     print(f'[INFO] Model Intercepts : {model.intercept_}')
+#     model.fit(X_poly_train, y_train)
+#
+#     # Access coefficients from the LinearRegression step within the pipeline
+#     coefficients = model.named_steps['linearregression'].coef_
+#     intercept = model.named_steps['linearregression'].intercept_
+#
+#     print(f'[INFO] Model Coefficients : {coefficients}')
+#     print(f'[INFO] Model Intercepts : {intercept}')
+#
+#
+from sklearn.pipeline import make_pipeline
 if polynomial_model == 'True':
     print('[INFO] Training Polynomial Regression Model')
 
@@ -101,7 +138,23 @@ if polynomial_model == 'True':
 
     model = LinearRegression()
 
-    model.fit(X_poly_train, y_train)
+    print('[INFO] Model Parameters')
+    print('Parameter : ', model.get_params())
+
+    # Create a pipeline with PolynomialFeatures and LinearRegression
+    pipeline = make_pipeline(pr, model)
+
+    # Fit the model using the pipeline
+    pipeline.fit(X_poly_train, y_train)
+
+    # Access coefficients from the LinearRegression step within the pipeline
+    coefficients = pipeline.named_steps['linearregression'].coef_
+    intercept = pipeline.named_steps['linearregression'].intercept_
+
+    print(f'[INFO] Model Coefficients : {coefficients}')
+    print(f'[INFO] Model Intercepts : {intercept}')
+
+
 
 if random_forest_model == 'True':
     print('[INFO] Training Random Forest Model')
@@ -113,6 +166,41 @@ if random_forest_model == 'True':
     X_poly_train = X_train
     X_poly_test = X_test
 
+if neural_network_model == 'True':
+
+    # Initialize the scaler
+    scaler = MinMaxScaler()
+
+    # Fit the scaler on the training data and transform both training and test data
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    print('[INFO] Training Neural Network Model')
+
+    model = Sequential()
+    model.add(Dense(8,
+                    input_dim=X_train.shape[1],
+                    activation='relu')
+              )
+    # model.add(Dense(64,
+    #                 activation='relu')
+    #           )
+    # model.add(Dense(32,
+    #                 activation='relu')
+    #           )
+    model.add(Dense(1,
+                    activation='linear'))
+    model.compile(
+            optimizer='adam',
+            loss='mean_squared_error'
+    )
+
+    model.fit(X_train, y_train,
+              epochs=100,
+              batch_size=16,
+              validation_split=0.2)
+    X_poly_train = X_train
+    X_poly_test = X_test
 if training_data_evaluation_plot == 'True':
     y_pred_train = model.predict(X_poly_train)  # Polynomial Regression
     plot_actual_vs_predicted(actual=y_train,
@@ -143,6 +231,8 @@ import matplotlib.pyplot as plt
 if training_data_evaluation_plot_plotly == 'True':
     # Predict results on testing Data
     y_pred_train = model.predict(X_poly_train)  # Polynomial Regression
+    if neural_network_model == 'True':
+        y_pred_train = y_pred_train.flatten()
 
     plot_actual_vs_predicted_using_plotly(actual=y_train,
                                           predicted=y_pred_train,
@@ -156,6 +246,9 @@ if training_data_evaluation_plot_plotly == 'True':
 if testing_data_evaluation_plot_plotly == 'True':
     # Predict results on testing Data
     y_pred_test = model.predict(X_poly_test)  # Polynomial Regression
+
+    if neural_network_model == 'True':
+        y_pred_test = y_pred_test.flatten()
 
     plot_actual_vs_predicted_using_plotly(actual=y_test,
                                           predicted=y_pred_test,
