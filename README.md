@@ -13,6 +13,30 @@ This project addresses a regression problem that has been tackled using multiple
 
 - **Simple Neural Network:** Basic neural network architecture for regression tasks.
 
+## The resulting directory structure
+
+
+The directory structure of your new project looks like this: 
+
+```
+├── LICENSE
+├── compiled_results          <- Compiled results of all models saved in this directory.
+├── configs                   <- it contain the configuration of the project(optional).
+├── datasets
+│   ├── dataset-testing.xlsx  <- Testing Data or unseen data.
+│   ├── dataset-training.xlsx <- Training Data or seen data.
+├── Materials                 <- This directory contains the requirements of the project.
+│
+├── Plots                     <- This directory contain the `visualization of the data` made by `matplotlib` and `plotly`.
+│
+├── results                   <- This direcoty contains the results of testing & training for each model in seperate files.
+│       
+├── trained_models            <- This directory contain `.pkl` files of trained models.
+├── main.py                   <- `main.py` is the main file that contain code of all project. You can handle it using `config.ini` files by runnning each operationg
+├── config.ini                <- it contain the main logic for runnning `main.py` file . this file it self explainatory.
+└── requirements.txt          <- it contain the reqiure packages that have to install in envrinment in order to run this project
+```
+
 
 ## Setup
 
