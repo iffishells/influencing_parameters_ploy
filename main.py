@@ -17,10 +17,8 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from sklearn.preprocessing import MinMaxScaler
 
-
-
-
 warnings.filterwarnings("ignore")
+
 parent_plot_directory = os.path.join('Plots/matplotlib/')
 parent_plot_plotly_directory = os.path.join('Plots/plotly/')
 
@@ -50,6 +48,7 @@ support_vector_machine_rbf = config.get('machine_learing_models', 'support_vecto
 support_vector_machine_linear = config.get('machine_learing_models', 'support_vector_machine_linear')
 support_vector_machine_poly = config.get('machine_learing_models', 'support_vector_machine_poly')
 support_vector_machine_sigmoid = config.get('machine_learing_models', 'support_vector_machine_sigmoid')
+gradient_boosting_regressor = config.get('machine_learing_models', 'gradient_boosting_regressor')
 
 model_name = config.get('machine_learing_models', 'model_name')
 compiled_all_results = config.get('machine_learing_models', 'compiled_all_results')
@@ -68,6 +67,13 @@ print(f'FilePath for Testing Data : {testing_file_path}')
 df_training = pd.read_excel(training_file_path)
 df_testing = pd.read_excel(testing_file_path)
 
+rows_to_add = int(0.3 * len(df_testing))
+sampled_rows = df_testing.sample(n=rows_to_add, random_state=42)
+df_training = pd.concat([df_training, sampled_rows], ignore_index=True)
+df_testing = df_testing.drop(sampled_rows.index)
+
+df_training.reset_index(drop=True, inplace=True)
+df_testing.reset_index(drop=True,inplace=True)
 # Training Data
 X_train = df_training[data_independent_features]
 y_train = df_training[data_dependent_features]
@@ -278,6 +284,17 @@ if support_vector_machine_sigmoid == 'True':
     X_poly_train = X_train
     X_poly_test = X_test
 
+from sklearn.ensemble import GradientBoostingRegressor
+
+if gradient_boosting_regressor == 'True':
+    print('[INFO] Training gradient_boosting_regressor Model ...')
+    model = GradientBoostingRegressor(random_state=0)
+    model.fit(X_train, y_train)
+    joblib.dump(model, f"trained_models/{model_name}.pkl")
+
+    X_poly_train = X_train
+    X_poly_test = X_test
+
 if training_data_evaluation_plot == 'True':
     y_pred_train = model.predict(X_poly_train)
     plot_actual_vs_predicted(actual=y_train,
@@ -346,8 +363,8 @@ if testing_data_evaluation_plot_plotly == 'True':
     error_metrics_df.to_csv(f'results/{model_name}/testing_results.csv', index=False)
 
 import glob
-if compiled_all_results == 'True':
 
+if compiled_all_results == 'True':
 
     compiled_results_dict = {
             'Model': [],
@@ -358,20 +375,21 @@ if compiled_all_results == 'True':
             'r2'   : [],
     }
 
-
-    list_of_models = [model.split('/')[-2]+'_'+model.split('/')[-1].split('.')[0].split('_')[0]+'_data'
+    list_of_models = [model.split('/')[-2] + '_' + model.split('/')[-1].split('.')[0].split('_')[0] + '_data'
                       for model in glob.glob('results/*/*.csv')]
     list_of_results_files = glob.glob('results/*/*.csv')
 
     for results_file_path in list_of_results_files:
 
-        model_name = results_file_path.split('/')[1] + '_'+ results_file_path.split('/')[-1].split('.')[0].split('_')[0] + '_data'
+        model_name = results_file_path.split('/')[1] + '_' + results_file_path.split('/')[-1].split('.')[0].split('_')[
+            0] + '_data'
         compiled_results_dict['Model'].append(model_name)
 
-        results_file_path_df =  pd.read_csv(results_file_path)
+        results_file_path_df = pd.read_csv(results_file_path)
         for i in range(5):
-            metrics_name , metric_value = results_file_path_df.to_dict(orient='records')[i]['Metric'] , results_file_path_df.to_dict(orient='records')[i]['Value']
+            metrics_name, metric_value = results_file_path_df.to_dict(orient='records')[i]['Metric'], \
+            results_file_path_df.to_dict(orient='records')[i]['Value']
             compiled_results_dict[metrics_name].append(metric_value)
-    compiled_results_df =  pd.DataFrame.from_dict(compiled_results_dict)
-    compiled_results_df.to_csv('compiled_results/compiled_all_model_results.csv',index=False)
-    print(compiled_results_df)
+    compiled_results_df = pd.DataFrame.from_dict(compiled_results_dict)
+    compiled_results_df.to_csv('compiled_results/compiled_all_model_results.csv', index=False)
+    print(compiled_results_df.sort_values(by='mae'))

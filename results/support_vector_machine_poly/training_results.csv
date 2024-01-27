@@ -1,6 +1,6 @@
 Metric,Value
-mae,0.71
-mse,1.1
-rmse,1.05
-mape,5.0
-r2,0.21
+mae,0.74
+mse,1.18
+rmse,1.09
+mape,6.0
+r2,0.14
