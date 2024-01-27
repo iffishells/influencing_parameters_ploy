@@ -1,0 +1,15 @@
+Model,mae,mse,rmse,mape,r2
+support_vector_machine_linear_training_data,0.75,1.24,1.11,6.0,0.11
+support_vector_machine_linear_testing_data,0.82,1.41,1.19,6.0,-0.17
+support_vector_machine_poly_training_data,0.71,1.1,1.05,5.0,0.21
+support_vector_machine_poly_testing_data,0.88,1.56,1.25,7.0,-0.3
+polynomial_model_training_data,0.65,0.79,0.89,5.0,0.43
+polynomial_model_testing_data,0.93,3.43,1.85,7.0,-1.85
+neural_network_model_training_data,0.84,1.32,1.15,7.0,0.05
+neural_network_model_testing_data,0.82,1.31,1.14,6.0,-0.09
+support_vector_machine_rbf_training_data,0.75,1.24,1.11,6.0,0.11
+support_vector_machine_rbf_testing_data,0.82,1.41,1.19,6.0,-0.17
+support_vector_machine_sigmoid_training_data,135.24,26577.53,163.03,1096.0,-19122.06
+support_vector_machine_sigmoid_testing_data,130.03,26082.25,161.5,1056.0,-21713.68
+random_forest_model_training_data,0.04,0.01,0.1,0.0,0.99
+random_forest_model_testing_data,1.07,1.93,1.39,8.0,-0.61
