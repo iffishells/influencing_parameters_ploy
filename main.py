@@ -1,4 +1,5 @@
 import os
+import joblib
 import pandas as pd
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
@@ -11,10 +12,13 @@ import configparser
 import warnings
 from sklearn.ensemble import RandomForestRegressor
 import ast
-# import tensorflow as tf
-# from tensorflow.keras.models import Sequential
-# from tensorflow.keras.layers import Dense
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
 from sklearn.preprocessing import MinMaxScaler
+
+
+
 
 warnings.filterwarnings("ignore")
 parent_plot_directory = os.path.join('Plots/matplotlib/')
@@ -40,6 +44,15 @@ testing_file_path = config.get('files_path', 'testing_file_path')
 polynomial_model = config.get('machine_learing_models', 'polynomial_model')
 random_forest_model = config.get('machine_learing_models', 'random_forest_model')
 neural_network_model = config.get('machine_learing_models', 'neural_network_model')
+
+# Support Vector Machine
+support_vector_machine_rbf = config.get('machine_learing_models', 'support_vector_machine_rbf')
+support_vector_machine_linear = config.get('machine_learing_models', 'support_vector_machine_linear')
+support_vector_machine_poly = config.get('machine_learing_models', 'support_vector_machine_poly')
+support_vector_machine_sigmoid = config.get('machine_learing_models', 'support_vector_machine_sigmoid')
+
+model_name = config.get('machine_learing_models', 'model_name')
+compiled_all_results = config.get('machine_learing_models', 'compiled_all_results')
 
 data_independent_features = ast.literal_eval(config.get('data_features', 'data_independent_features'))
 data_dependent_features = ast.literal_eval(config.get('data_features', 'data_dependent_features'))
@@ -81,7 +94,7 @@ if correlation_matrix_plot == 'True':
     plot_correlation_matrics(df=df_training,
                              saving_path=parent_plot_directory,
                              title='training_data')
-    plot_correlation_matrics(df= df_testing,
+    plot_correlation_matrics(df=df_testing,
                              saving_path=parent_plot_directory,
                              title='testing_data')
 
@@ -98,8 +111,6 @@ if data_plot == 'True':
                   saving_path=parent_plot_plotly_directory,
                   title='CombinedData'
                   )
-
-
 
 # if polynomial_model == 'True':
 #     print('[INFO] Training Polynomial Regression Model')
@@ -127,6 +138,7 @@ if data_plot == 'True':
 #
 #
 from sklearn.pipeline import make_pipeline
+
 if polynomial_model == 'True':
     print('[INFO] Training Polynomial Regression Model')
 
@@ -137,24 +149,23 @@ if polynomial_model == 'True':
     X_poly_test = pr.fit_transform(X_test)
 
     model = LinearRegression()
+    model.fit(X_poly_train, y_train)
 
-    print('[INFO] Model Parameters')
-    print('Parameter : ', model.get_params())
-
-    # Create a pipeline with PolynomialFeatures and LinearRegression
-    pipeline = make_pipeline(pr, model)
-
-    # Fit the model using the pipeline
-    pipeline.fit(X_poly_train, y_train)
-
-    # Access coefficients from the LinearRegression step within the pipeline
-    coefficients = pipeline.named_steps['linearregression'].coef_
-    intercept = pipeline.named_steps['linearregression'].intercept_
-
-    print(f'[INFO] Model Coefficients : {coefficients}')
-    print(f'[INFO] Model Intercepts : {intercept}')
-
-
+    # print('[INFO] Model Parameters')
+    # print('Parameter : ', model.get_params())
+    #
+    # # Create a pipeline with PolynomialFeatures and LinearRegression
+    # pipeline = make_pipeline(pr, model)
+    #
+    # # Fit the model using the pipeline
+    # pipeline.fit(X_poly_train, y_train)
+    #
+    # # Access coefficients from the LinearRegression step within the pipeline
+    # coefficients = pipeline.named_steps['linearregression'].coef_
+    # intercept = pipeline.named_steps['linearregression'].intercept_
+    #
+    # print(f'[INFO] Model Coefficients : {coefficients}')
+    # print(f'[INFO] Model Intercepts : {intercept}')
 
 if random_forest_model == 'True':
     print('[INFO] Training Random Forest Model')
@@ -163,11 +174,12 @@ if random_forest_model == 'True':
 
     # Fit the model on the training data
     model.fit(X_train, y_train)
+    joblib.dump(model, f"trained_models/{model_name}.pkl")
+
     X_poly_train = X_train
     X_poly_test = X_test
 
 if neural_network_model == 'True':
-
     # Initialize the scaler
     scaler = MinMaxScaler()
 
@@ -201,8 +213,73 @@ if neural_network_model == 'True':
               validation_split=0.2)
     X_poly_train = X_train
     X_poly_test = X_test
+
+from sklearn import svm
+import joblib
+
+if support_vector_machine_rbf == 'True':
+    print('[INFO] Training Support Vector Machine kernel==RBF')
+    # Initialize the scaler
+    scaler = MinMaxScaler()
+
+    # Fit the scaler on the training data and transform both training and test data
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+    model = svm.SVR(kernel='rbf')
+    model.fit(X_train, y_train)
+    joblib.dump(model, f"trained_models/{model_name}.pkl")
+
+    X_poly_train = X_train
+    X_poly_test = X_test
+
+if support_vector_machine_linear == 'True':
+    print('[INFO] Training Support Vector Machine kernel = linear')
+    # Initialize the scaler
+    scaler = MinMaxScaler()
+
+    # Fit the scaler on the training data and transform both training and test data
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    model = svm.SVR(kernel='linear')
+    model.fit(X_train, y_train)
+    joblib.dump(model, f"trained_models/{model_name}.pkl")
+
+    X_poly_train = X_train
+    X_poly_test = X_test
+
+if support_vector_machine_poly == 'True':
+    print('[INFO] Training Support Vector Machine kernel = poly')
+    # Initialize the scaler
+    scaler = MinMaxScaler()
+
+    # Fit the scaler on the training data and transform both training and test data
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+    model = svm.SVR(kernel='poly')
+    model.fit(X_train, y_train)
+    joblib.dump(model, f"trained_models/{model_name}.pkl")
+
+    X_poly_train = X_train
+    X_poly_test = X_test
+
+if support_vector_machine_sigmoid == 'True':
+    print('[INFO] Training Support Vector Machine kernel = poly')
+    # Initialize the scaler
+    scaler = MinMaxScaler()
+
+    # Fit the scaler on the training data and transform both training and test data
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+    model = svm.SVR(kernel='sigmoid')
+    model.fit(X_train, y_train)
+    joblib.dump(model, f"trained_models/{model_name}.pkl")
+
+    X_poly_train = X_train
+    X_poly_test = X_test
+
 if training_data_evaluation_plot == 'True':
-    y_pred_train = model.predict(X_poly_train)  # Polynomial Regression
+    y_pred_train = model.predict(X_poly_train)
     plot_actual_vs_predicted(actual=y_train,
                              predicted=y_pred_train,
                              parent_saving_path=parent_plot_directory,
@@ -211,6 +288,7 @@ if training_data_evaluation_plot == 'True':
                              )
 
     error_metrics = calculate_errors(y_train, y_pred_train)
+
     print(f'Error Metrics on Training Data : {error_metrics}')
 
 if testing_data_evaluation_plot == 'True':
@@ -226,11 +304,10 @@ if testing_data_evaluation_plot == 'True':
 
     error_metrics = calculate_errors(y_test, y_pred_test)
     print(f'Error Metrics on Testing Data : {error_metrics}')
-import matplotlib.pyplot as plt
 
 if training_data_evaluation_plot_plotly == 'True':
     # Predict results on testing Data
-    y_pred_train = model.predict(X_poly_train)  # Polynomial Regression
+    y_pred_train = model.predict(X_poly_train)
     if neural_network_model == 'True':
         y_pred_train = y_pred_train.flatten()
 
@@ -242,6 +319,11 @@ if training_data_evaluation_plot_plotly == 'True':
                                           )
     error_metrics = calculate_errors(y_train, y_pred_train)
     print(f'Error Metrics on Training Data : {error_metrics}')
+
+    # Saving Results
+    error_metrics_df = pd.DataFrame(list(error_metrics.items()), columns=['Metric', 'Value'])
+    os.makedirs(f'results/{model_name}', exist_ok=True)
+    error_metrics_df.to_csv(f'results/{model_name}/training_results.csv', index=False)
 
 if testing_data_evaluation_plot_plotly == 'True':
     # Predict results on testing Data
@@ -257,3 +339,39 @@ if testing_data_evaluation_plot_plotly == 'True':
                                           title='Results on Testing Data')
     error_metrics = calculate_errors(y_test, y_pred_test)
     print(f'Error Metrics on Testing Data : {error_metrics}')
+
+    # Saving Results
+    error_metrics_df = pd.DataFrame(list(error_metrics.items()), columns=['Metric', 'Value'])
+    os.makedirs(f'results/{model_name}', exist_ok=True)
+    error_metrics_df.to_csv(f'results/{model_name}/testing_results.csv', index=False)
+
+import glob
+if compiled_all_results == 'True':
+
+
+    compiled_results_dict = {
+            'Model': [],
+            'mae'  : [],
+            'mse'  : [],
+            'rmse' : [],
+            'mape' : [],
+            'r2'   : [],
+    }
+
+
+    list_of_models = [model.split('/')[-2]+'_'+model.split('/')[-1].split('.')[0].split('_')[0]+'_data'
+                      for model in glob.glob('results/*/*.csv')]
+    list_of_results_files = glob.glob('results/*/*.csv')
+
+    for results_file_path in list_of_results_files:
+
+        model_name = results_file_path.split('/')[1] + '_'+ results_file_path.split('/')[-1].split('.')[0].split('_')[0] + '_data'
+        compiled_results_dict['Model'].append(model_name)
+
+        results_file_path_df =  pd.read_csv(results_file_path)
+        for i in range(5):
+            metrics_name , metric_value = results_file_path_df.to_dict(orient='records')[i]['Metric'] , results_file_path_df.to_dict(orient='records')[i]['Value']
+            compiled_results_dict[metrics_name].append(metric_value)
+    compiled_results_df =  pd.DataFrame.from_dict(compiled_results_dict)
+    compiled_results_df.to_csv('compiled_results/compiled_all_model_results.csv',index=False)
+    print(compiled_results_df)

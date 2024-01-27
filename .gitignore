@@ -6,3 +6,4 @@ env
 # ignore specifc directory
 plots
 plots/*
+trained_models/*
