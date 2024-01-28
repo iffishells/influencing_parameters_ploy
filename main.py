@@ -118,31 +118,6 @@ if data_plot == 'True':
                   title='CombinedData'
                   )
 
-# if polynomial_model == 'True':
-#     print('[INFO] Training Polynomial Regression Model')
-#
-#     # Modeling
-#     # Train polynomial regression model on the whole dataset
-#     pr = PolynomialFeatures(degree=4)
-#     X_poly_train = pr.fit_transform(X_train)
-#     X_poly_test = pr.fit_transform(X_test)
-#
-#     model = LinearRegression()
-#
-#     print('[INFO] Model Parameters')
-#     print('Parameter : ', model.get_params())
-#     print(f'[INFO] Model Coefficients : {model.coef_}')
-#     print(f'[INFO] Model Intercepts : {model.intercept_}')
-#     model.fit(X_poly_train, y_train)
-#
-#     # Access coefficients from the LinearRegression step within the pipeline
-#     coefficients = model.named_steps['linearregression'].coef_
-#     intercept = model.named_steps['linearregression'].intercept_
-#
-#     print(f'[INFO] Model Coefficients : {coefficients}')
-#     print(f'[INFO] Model Intercepts : {intercept}')
-#
-#
 from sklearn.pipeline import make_pipeline
 
 if polynomial_model == 'True':
@@ -157,22 +132,8 @@ if polynomial_model == 'True':
     model = LinearRegression()
     model.fit(X_poly_train, y_train)
 
-    # print('[INFO] Model Parameters')
-    # print('Parameter : ', model.get_params())
-    #
-    # # Create a pipeline with PolynomialFeatures and LinearRegression
-    # pipeline = make_pipeline(pr, model)
-    #
-    # # Fit the model using the pipeline
-    # pipeline.fit(X_poly_train, y_train)
-    #
-    # # Access coefficients from the LinearRegression step within the pipeline
-    # coefficients = pipeline.named_steps['linearregression'].coef_
-    # intercept = pipeline.named_steps['linearregression'].intercept_
-    #
-    # print(f'[INFO] Model Coefficients : {coefficients}')
-    # print(f'[INFO] Model Intercepts : {intercept}')
 
+import pickle
 if random_forest_model == 'True':
     print('[INFO] Training Random Forest Model')
     # Modeling using Random Forest
@@ -180,8 +141,10 @@ if random_forest_model == 'True':
 
     # Fit the model on the training data
     model.fit(X_train, y_train)
-    joblib.dump(model, f"trained_models/{model_name}.pkl")
+    # joblib.dump(model, f"trained_models/{model_name}.joblib")
 
+    with open(f"trained_models/{model_name}.pickle",'wb' ) as file:
+            pickle.dump(model, file)
     X_poly_train = X_train
     X_poly_test = X_test
 
@@ -192,20 +155,26 @@ if neural_network_model == 'True':
     # Fit the scaler on the training data and transform both training and test data
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
+    with open(f"trained_models/{model_name}_scaler.pickle",'wb' ) as file:
+        pickle.dump(scaler, file)
 
     print('[INFO] Training Neural Network Model')
 
     model = Sequential()
-    model.add(Dense(8,
+    model.add(Dense(64,
                     input_dim=X_train.shape[1],
                     activation='relu')
               )
-    # model.add(Dense(64,
-    #                 activation='relu')
-    #           )
-    # model.add(Dense(32,
-    #                 activation='relu')
-    #           )
+    model.add(Dense(32,
+                    activation='relu')
+              )
+    model.add(Dense(16,
+                    activation='relu')
+              )
+    model.add(Dense(8,
+                    activation='relu')
+              )
+    
     model.add(Dense(1,
                     activation='linear'))
     model.compile(
@@ -217,6 +186,10 @@ if neural_network_model == 'True':
               epochs=100,
               batch_size=16,
               validation_split=0.2)
+    
+    with open(f"trained_models/{model_name}.pickle",'wb' ) as file:
+        pickle.dump(model, file)
+
     X_poly_train = X_train
     X_poly_test = X_test
 
@@ -231,9 +204,14 @@ if support_vector_machine_rbf == 'True':
     # Fit the scaler on the training data and transform both training and test data
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
+    with open(f"trained_models/{model_name}_scaler.pickle",'wb' ) as file:
+        pickle.dump(scaler, file)
+
     model = svm.SVR(kernel='rbf')
     model.fit(X_train, y_train)
-    joblib.dump(model, f"trained_models/{model_name}.pkl")
+    
+    with open(f"trained_models/{model_name}.pickle",'wb' ) as file:
+        pickle.dump(model, file)
 
     X_poly_train = X_train
     X_poly_test = X_test
@@ -246,10 +224,13 @@ if support_vector_machine_linear == 'True':
     # Fit the scaler on the training data and transform both training and test data
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
+    with open(f"trained_models/{model_name}_scaler.pickle",'wb' ) as file:
+        pickle.dump(scaler, file)
 
     model = svm.SVR(kernel='linear')
     model.fit(X_train, y_train)
-    joblib.dump(model, f"trained_models/{model_name}.pkl")
+    with open(f"trained_models/{model_name}.pickle",'wb' ) as file:
+        pickle.dump(model, file)
 
     X_poly_train = X_train
     X_poly_test = X_test
@@ -262,24 +243,39 @@ if support_vector_machine_poly == 'True':
     # Fit the scaler on the training data and transform both training and test data
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
+    
+    with open(f"trained_models/{model_name}_scaler.pickle",'wb' ) as file:
+        pickle.dump(scaler, file)
+
+    
     model = svm.SVR(kernel='poly')
     model.fit(X_train, y_train)
-    joblib.dump(model, f"trained_models/{model_name}.pkl")
+    with open(f"trained_models/{model_name}.pickle",'wb' ) as file:
+        pickle.dump(model, file)
 
     X_poly_train = X_train
     X_poly_test = X_test
 
 if support_vector_machine_sigmoid == 'True':
-    print('[INFO] Training Support Vector Machine kernel = poly')
+    print('[INFO] Training Support Vector Machine kernel = sigmoid')
     # Initialize the scaler
     scaler = MinMaxScaler()
 
     # Fit the scaler on the training data and transform both training and test data
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
+    
+    with open(f"trained_models/{model_name}_scaler.pickle",'wb' ) as file:
+        pickle.dump(scaler, file)
+
+    
+    with open(f"trained_models/{model_name}_scaler.pickle",'wb' ) as file:
+        pickle.dump(scaler, file)
+
     model = svm.SVR(kernel='sigmoid')
     model.fit(X_train, y_train)
-    joblib.dump(model, f"trained_models/{model_name}.pkl")
+    with open(f"trained_models/{model_name}.pickle",'wb' ) as file:
+        pickle.dump(model, file)
 
     X_poly_train = X_train
     X_poly_test = X_test
@@ -290,7 +286,9 @@ if gradient_boosting_regressor == 'True':
     print('[INFO] Training gradient_boosting_regressor Model ...')
     model = GradientBoostingRegressor(random_state=0)
     model.fit(X_train, y_train)
-    joblib.dump(model, f"trained_models/{model_name}.pkl")
+    
+    with open(f"trained_models/{model_name}.pickle",'wb' ) as file:
+        pickle.dump(model, file)
 
     X_poly_train = X_train
     X_poly_test = X_test
@@ -361,6 +359,21 @@ if testing_data_evaluation_plot_plotly == 'True':
     error_metrics_df = pd.DataFrame(list(error_metrics.items()), columns=['Metric', 'Value'])
     os.makedirs(f'results/{model_name}', exist_ok=True)
     error_metrics_df.to_csv(f'results/{model_name}/testing_results.csv', index=False)
+
+import pickle
+random_forest_model_trained_model = config.get('load_trained_models', 'random_forest_model_trained_model')
+if random_forest_model_trained_model == 'True':
+    print('[INFO] Loading Trained Random forest model')
+    model_results_path ='trained_models/random_forest_model.pickle'
+    with open(model_results_path, 'rb') as file:
+        trained_model = pickle.load(file)
+    
+    input_features = ["t", "Factor 1(P)", "Factor 2(T)", "Factor 4(W)", "Factor 5(R)"]
+    df = pd.read_excel("datasets/DataSet-testing.xlsx")
+    input_values = df[input_features]
+    print(trained_model.predict(input_values))
+
+
 
 import glob
 

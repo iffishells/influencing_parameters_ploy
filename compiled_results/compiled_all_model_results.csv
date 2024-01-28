@@ -1,12 +1,12 @@
 Model,mae,mse,rmse,mape,r2
-support_vector_machine_linear_training_data,0.76,1.26,1.12,6.0,0.09
-support_vector_machine_linear_testing_data,0.76,1.28,1.13,6.0,-0.08
+support_vector_machine_linear_training_data,0.74,1.18,1.09,6.0,0.14
+support_vector_machine_linear_testing_data,0.78,1.33,1.15,6.0,-0.13
 support_vector_machine_poly_training_data,0.74,1.18,1.09,6.0,0.14
 support_vector_machine_poly_testing_data,0.78,1.33,1.15,6.0,-0.13
 polynomial_model_training_data,0.72,0.98,0.99,6.0,0.29
 polynomial_model_testing_data,0.8,1.97,1.4,6.0,-0.67
-neural_network_model_training_data,0.73,1.01,1.0,6.0,0.27
-neural_network_model_testing_data,0.81,1.22,1.1,6.0,-0.04
+neural_network_model_training_data,0.67,0.87,0.93,5.0,0.37
+neural_network_model_testing_data,0.83,1.25,1.12,6.0,-0.06
 support_vector_machine_rbf_training_data,0.68,0.98,0.99,5.0,0.29
 support_vector_machine_rbf_testing_data,0.78,1.23,1.11,6.0,-0.04
 gradient_boosting_regressor_training_data,0.52,0.56,0.75,4.0,0.59
