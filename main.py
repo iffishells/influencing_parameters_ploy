@@ -187,8 +187,14 @@ if neural_network_model == 'True':
               batch_size=16,
               validation_split=0.2)
     
-    with open(f"trained_models/{model_name}.pickle",'wb' ) as file:
-        pickle.dump(model, file)
+    model.save(f"trained_models/{model_name}.h5")
+#     from keras.models import load_model
+
+# loaded_model = load_model(f"trained_models/{model_name}.h5")
+
+
+    # with open(f"trained_models/{model_name}.pickle",'wb' ) as file:
+    #     pickle.dump(model, file)
 
     X_poly_train = X_train
     X_poly_test = X_test
@@ -281,14 +287,21 @@ if support_vector_machine_sigmoid == 'True':
     X_poly_test = X_test
 
 from sklearn.ensemble import GradientBoostingRegressor
-
+import joblib
 if gradient_boosting_regressor == 'True':
     print('[INFO] Training gradient_boosting_regressor Model ...')
-    model = GradientBoostingRegressor(random_state=0)
+    model = GradientBoostingRegressor(
+                                    learning_rate=0.0001,
+                                    n_estimators = 2000,
+                                    subsample = 0.2,
+                                    min_samples_split = 2,
+                                    random_state=42)
     model.fit(X_train, y_train)
     
-    with open(f"trained_models/{model_name}.pickle",'wb' ) as file:
-        pickle.dump(model, file)
+    joblib.dump(model, f"trained_models/{model_name}.pkl")    
+    
+    # with open(f"trained_models/{model_name}.pickle",'wb' ) as file:
+    #     pickle.dump(model, file)
 
     X_poly_train = X_train
     X_poly_test = X_test
